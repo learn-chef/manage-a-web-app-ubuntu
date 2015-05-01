@@ -1,0 +1,23 @@
+# Managed by Chef for <%= node['hostname'] %>
+<VirtualHost *:80>
+  ServerAdmin <%= node['apache']['contact'] %>
+
+  DocumentRoot <%= node['apache']['docroot_dir'] %>
+  <Directory />
+          Options FollowSymLinks
+          AllowOverride None
+  </Directory>
+  <Directory <%= node['apache']['docroot_dir'] %>>
+          Options Indexes FollowSymLinks MultiViews
+          AllowOverride None
+          Order allow,deny
+          allow from all
+  </Directory>
+
+  ErrorLog <%= node['apache']['log_dir'] %>/error.log
+
+  LogLevel warn
+
+  CustomLog <%= node['apache']['log_dir'] %>/access.log combined
+  ServerSignature Off
+</VirtualHost>
