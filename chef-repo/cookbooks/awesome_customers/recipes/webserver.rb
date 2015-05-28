@@ -3,6 +3,8 @@
 # Recipe:: webserver
 #
 # Copyright (c) 2015 The Authors, All Rights Reserved.
+# Install the mod_php5 Apache module.
+#include_recipe 'apache2::mod_php5'
 # Install Apache and configure its service.
 include_recipe 'apache2::default'
 
@@ -38,7 +40,6 @@ firewall_rule 'http' do
   action :allow
 end
 
-# Install the mod_php5 Apache module.
 include_recipe 'apache2::mod_php5'
 
 # Install php5-mysql.
