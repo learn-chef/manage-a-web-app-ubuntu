@@ -3,14 +3,15 @@
 # Recipe:: webserver
 #
 # Copyright (c) 2015 The Authors, All Rights Reserved.
-# Install the mod_php5 Apache module.
-#include_recipe 'apache2::mod_php5'
-# Install Apache and configure its service.
-include_recipe 'apache2::default'
+# Install Apache.
+httpd_service 'default' do
+  version '2.4'
+  mpm 'prefork'
+end
 
-# Create and enable our custom site.
-web_app node['awesome_customers']['name'] do
-  template "#{node['awesome_customers']['config']}.erb"
+# Add the site configuration.
+httpd_config 'customers' do
+  source "#{node['awesome_customers']['config']}.erb"
 end
 
 # Create the document root.
@@ -40,10 +41,11 @@ firewall_rule 'http' do
   action :allow
 end
 
-include_recipe 'apache2::mod_php5'
+# Install mod_php5. 
+httpd_module 'php5'
 
 # Install php5-mysql.
 package 'php5-mysql' do
   action :install
-  notifies :restart, 'service[apache2]'
+  notifies :restart, 'httpd_service[default]'
 end
