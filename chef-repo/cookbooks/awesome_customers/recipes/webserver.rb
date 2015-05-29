@@ -4,18 +4,20 @@
 #
 # Copyright (c) 2015 The Authors, All Rights Reserved.
 # Install Apache.
-httpd_service 'default' do
-  version '2.4'
+httpd_service 'customers' do
   mpm 'prefork'
+  action [:create, :start]
 end
 
 # Add the site configuration.
 httpd_config 'customers' do
-  source "#{node['awesome_customers']['config']}.erb"
+  instance 'customers'
+  source 'customers.conf.erb'
+  notifies :restart, 'httpd_service[customers]'
 end
 
 # Create the document root.
-directory node['apache']['docroot_dir'] do
+directory node['awesome_customers']['document_root'] do
   recursive true
 end
 
@@ -24,7 +26,7 @@ password_secret = Chef::EncryptedDataBagItem.load_secret("#{node['awesome_custom
 user_password_data_bag_item = Chef::EncryptedDataBagItem.load('passwords', 'db_admin', password_secret)
 
 # Write a default home page.
-template "#{node['apache']['docroot_dir']}/index.php" do
+template "#{node['awesome_customers']['document_root']}/index.php" do
   source 'index.php.erb'
   mode '0644'
   owner node['awesome_customers']['user']
@@ -41,11 +43,19 @@ firewall_rule 'http' do
   action :allow
 end
 
-# Install mod_php5. 
-httpd_module 'php5'
+# Install the mod_php5 Apache module.
+package 'libapache2-mod-php5'
+
+httpd_module 'php5' do
+  instance 'customers'
+end
+
+file '/etc/apache2-customers/mods-enabled/php5.load' do
+  content 'LoadModule php5_module /usr/lib/apache2/modules/libphp5.so'
+end
 
 # Install php5-mysql.
 package 'php5-mysql' do
   action :install
-  notifies :restart, 'httpd_service[default]'
+  notifies :restart, 'httpd_service[customers]'
 end
