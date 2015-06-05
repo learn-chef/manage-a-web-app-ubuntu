@@ -3,7 +3,7 @@
 # Recipe:: webserver
 #
 # Copyright (c) 2015 The Authors, All Rights Reserved.
-# Install Apache.
+# Install Apache and start the service.
 httpd_service 'customers' do
   mpm 'prefork'
   action [:create, :start]
@@ -44,14 +44,8 @@ firewall_rule 'http' do
 end
 
 # Install the mod_php5 Apache module.
-package 'libapache2-mod-php5'
-
 httpd_module 'php5' do
   instance 'customers'
-end
-
-file '/etc/apache2-customers/mods-enabled/php5.load' do
-  content 'LoadModule php5_module /usr/lib/apache2/modules/libphp5.so'
 end
 
 # Install php5-mysql.
