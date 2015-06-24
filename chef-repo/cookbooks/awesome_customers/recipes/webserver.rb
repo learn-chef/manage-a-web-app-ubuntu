@@ -16,7 +16,7 @@ httpd_config 'customers' do
   notifies :restart, 'httpd_service[customers]'
 end
 
-# Create the document root.
+# Create the document root directory.
 directory node['awesome_customers']['document_root'] do
   recursive true
 end
@@ -25,7 +25,7 @@ end
 password_secret = Chef::EncryptedDataBagItem.load_secret("#{node['awesome_customers']['passwords']['secret_path']}")
 user_password_data_bag_item = Chef::EncryptedDataBagItem.load('passwords', 'db_admin', password_secret)
 
-# Write a default home page.
+# Write the home page.
 template "#{node['awesome_customers']['document_root']}/index.php" do
   source 'index.php.erb'
   mode '0644'
