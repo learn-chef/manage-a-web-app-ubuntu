@@ -23,7 +23,7 @@ end
 
 # Load the secrets file and the encrypted data bag item that holds the database password.
 password_secret = Chef::EncryptedDataBagItem.load_secret("#{node['awesome_customers']['passwords']['secret_path']}")
-user_password_data_bag_item = Chef::EncryptedDataBagItem.load('passwords', 'db_admin', password_secret)
+user_password_data_bag_item = Chef::EncryptedDataBagItem.load('passwords', 'db_admin_password', password_secret)
 
 # Write the home page.
 template "#{node['awesome_customers']['document_root']}/index.php" do
