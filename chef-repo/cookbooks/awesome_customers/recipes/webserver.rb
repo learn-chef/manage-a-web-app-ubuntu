@@ -3,25 +3,30 @@
 # Recipe:: webserver
 #
 # Copyright (c) 2015 The Authors, All Rights Reserved.
-# Install Apache and configure its service.
-include_recipe 'apache2::default'
-
-# Create and enable our custom site.
-web_app node['awesome_customers']['name'] do
-  template "#{node['awesome_customers']['config']}.erb"
+# Install Apache and start the service.
+httpd_service 'customers' do
+  mpm 'prefork'
+  action [:create, :start]
 end
 
-# Create the document root.
-directory node['apache']['docroot_dir'] do
+# Add the site configuration.
+httpd_config 'customers' do
+  instance 'customers'
+  source 'customers.conf.erb'
+  notifies :restart, 'httpd_service[customers]'
+end
+
+# Create the document root directory.
+directory node['awesome_customers']['document_root'] do
   recursive true
 end
 
 # Load the secrets file and the encrypted data bag item that holds the database password.
 password_secret = Chef::EncryptedDataBagItem.load_secret("#{node['awesome_customers']['passwords']['secret_path']}")
-user_password_data_bag_item = Chef::EncryptedDataBagItem.load('passwords', 'db_admin', password_secret)
+user_password_data_bag_item = Chef::EncryptedDataBagItem.load('passwords', 'db_admin_password', password_secret)
 
-# Write a default home page.
-template "#{node['apache']['docroot_dir']}/index.php" do
+# Write the home page.
+template "#{node['awesome_customers']['document_root']}/index.php" do
   source 'index.php.erb'
   mode '0644'
   owner node['awesome_customers']['user']
@@ -39,10 +44,12 @@ firewall_rule 'http' do
 end
 
 # Install the mod_php5 Apache module.
-include_recipe 'apache2::mod_php5'
+httpd_module 'php5' do
+  instance 'customers'
+end
 
 # Install php5-mysql.
 package 'php5-mysql' do
   action :install
-  notifies :restart, 'service[apache2]'
+  notifies :restart, 'httpd_service[customers]'
 end

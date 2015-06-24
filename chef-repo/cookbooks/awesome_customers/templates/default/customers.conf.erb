@@ -1,23 +1,27 @@
-# Managed by Chef for <%= node['hostname'] %>
 <VirtualHost *:80>
-  ServerAdmin <%= node['apache']['contact'] %>
+  ServerName <%= node['hostname'] %>
+  ServerAdmin 'ops@example.com'
 
-  DocumentRoot <%= node['apache']['docroot_dir'] %>
+  DocumentRoot <%= node['awesome_customers']['document_root'] %>
   <Directory />
           Options FollowSymLinks
           AllowOverride None
   </Directory>
-  <Directory <%= node['apache']['docroot_dir'] %>>
+  <Directory <%= node['awesome_customers']['document_root'] %> >
           Options Indexes FollowSymLinks MultiViews
           AllowOverride None
           Order allow,deny
           allow from all
   </Directory>
 
-  ErrorLog <%= node['apache']['log_dir'] %>/error.log
+  ErrorLog /var/log/apache2/error.log
 
   LogLevel warn
 
-  CustomLog <%= node['apache']['log_dir'] %>/access.log combined
+  CustomLog /var/log/apache2/access.log combined
   ServerSignature Off
+
+  AddType application/x-httpd-php .php
+  AddType application/x-httpd-php-source .phps
+  DirectoryIndex index.php index.html
 </VirtualHost>
