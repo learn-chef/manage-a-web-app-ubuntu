@@ -34,7 +34,7 @@ mysql_database node['awesome_customers']['database']['dbname'] do
 end
 
 # Load the encrypted data bag item that holds the database user's password.
-user_password_data_bag_item = Chef::EncryptedDataBagItem.load('passwords', ''db_admin_password',', password_secret)
+user_password_data_bag_item = Chef::EncryptedDataBagItem.load('passwords', 'db_admin_password', password_secret)
 
 # Add a database user.
 mysql_database_user node['awesome_customers']['database']['app']['username'] do
